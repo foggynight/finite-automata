@@ -1,11 +1,9 @@
 (* DFA.ml - Deterministic Finite Automata in OCaml. *)
 (* Copyright (C) 2026 Robert Coffey *)
 
-let explode (str : string) : char list =
-  List.init (String.length str) (String.get str)
+open Util
 
-let implode (lst : char list) : string =
-  String.of_seq (List.to_seq lst)
+module DFA = struct
 
 type dfa_trans = {
     c : char;
@@ -37,22 +35,11 @@ let dfa_step (dfa : dfa) (state : int) (c : char) : int =
      | Some trans -> trans.next_state
 
 let rec dfa_eval (dfa : dfa) (state : int) (cs : char list) : bool =
-  Printf.printf "State = %d; Input = %s\n" state (implode cs);
+  Printf.printf "State = %d; Input = %s\n" state (Util.implode cs);
   match cs with
   | [] -> List.mem state dfa.accepts
   | head :: tail ->
      let next_state = dfa_step dfa state head in
      dfa_eval dfa next_state tail
 
-let main (str : string) =
-  let dfa = {
-      states = [
-        { id = 1; transs = [{ c = 'A'; next_state = 2 }] };
-        { id = 2; transs = [{ c = 'B'; next_state = 3 }] };
-        { id = 3; transs = [{ c = 'C'; next_state = 4 }] };
-      ];
-      accepts = [4]
-    }
-  in
-  let result = dfa_eval dfa 1 (explode str) in
-  Printf.printf "Result: %b\n" result
+end
