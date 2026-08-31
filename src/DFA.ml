@@ -23,10 +23,10 @@ type dfa = {
   }
 
 let find_state (lst : dfa_state list) (state : int) : dfa_state option =
-  List.find_opt (fun x -> x.id == state) lst
+  List.find_opt (fun x -> x.id = state) lst
 
 let find_trans (lst : dfa_trans list) (c : char) : dfa_trans option =
-  List.find_opt (fun x -> x.c == c) lst
+  List.find_opt (fun x -> x.c = c) lst
 
 let step (dfa : dfa) (state : int) (c : char) : int =
   match find_state dfa.states state with
@@ -44,54 +44,59 @@ let rec eval (dfa : dfa) (state : int) (cs : char list) : bool =
      let next_state = step dfa state head in
      eval dfa next_state tail
 
-let is_comment (line : string) : bool =
-  let res = (String.length line > 0) && (String.starts_with ~prefix:"--" line) in
+(* DFA Description File Parser ************************************************)
+
+let line_is_comment (line : string) : bool =
+  let res = String.starts_with ~prefix:"--" line in
   if res then Printf.printf "Comment: %s\n" line;
   res
 
-let parse_alphabet (lines : string list)
+let parse_single_line (lines : string list) : (string * string list) option =
+  Util.uncons lines
+
+let parse_counted_lines (lines : string list)
     : (int * string list * string list) option =
   let* (head, tail) = Util.uncons lines in
-  let alpha_size = int_of_string head in
+  let n = int_of_string head in
   match tail with
-  | [] -> None
-  | alpha_lines ->
-     Some (alpha_size,
-           List.take alpha_size alpha_lines,
-           List.drop alpha_size alpha_lines)
+    | [] -> None
+    | rest_lines ->
+       if List.length rest_lines < n
+       then None
+       else Some (n, List.take n rest_lines, List.drop n rest_lines)
 
-let print_alphabet (alphabet : string list) : unit =
-  let rec print lst =
-    match lst with
-    | [] -> print_char ']'
-    | head :: tail ->
-       Printf.printf "%s; " head;
-       print tail
-  in print_char '['; print alphabet
-
-let parse_states (lines : string list)
-    : (int * dfa_state list * string list) option =
-  None
-
-let print_states (states : dfa_state list) : unit =
-  ()
-
-let parse_lines (lines1 : string list) : dfa option =
-  let lines2 =
-    List.filter
-      (fun x -> String.length x > 0 && not (is_comment x))
-      lines1
+(* Expects a list of strings representing the lines of a DFA description file,
+ * with the terminating newline characters removed. *)
+let parse_lines (lines : string list) : dfa option =
+  let lines = List.filter
+                (fun x -> not (Util.string_space_only x || line_is_comment x))
+                lines
   in
 
-  let* (alphabet_size, dfa_alphabet, lines4) = parse_alphabet lines2 in
-  Printf.printf "Alphabet Size: %d\n" alphabet_size;
-  print_alphabet dfa_alphabet; print_char '\n';
+  let* (albet_size, dfa_albet_strs, lines) = parse_counted_lines lines in
+  Printf.printf "Alphabet Size: %d\n" albet_size;
+  Util.print_list_string dfa_albet_strs;
+  print_char '\n';
 
-  let* (state_count, dfa_states, lines5) = parse_states lines4 in
+  let* (state_count, dfa_state_strs, lines) = parse_counted_lines lines in
   Printf.printf "State Count: %d\n" state_count;
-  print_states dfa_states; print_char '\n';
+  Util.print_list_string dfa_state_strs;
+  print_char '\n';
 
-  if lines5 == []
+  let* (init_state_str, lines) = parse_single_line lines in
+  Printf.printf "Initial State: %s\n" init_state_str;
+
+  let* (accept_count, accept_state_strs, lines) = parse_counted_lines lines in
+  Printf.printf "Accepting State Count: %d\n" accept_count;
+  Util.print_list_string accept_state_strs;
+  print_char '\n';
+
+  let* (trans_count, trans_strs, lines) = parse_counted_lines lines in
+  Printf.printf "Transition Count: %d\n" trans_count;
+  Util.print_list_string trans_strs;
+  print_char '\n';
+
+  if lines = []
   then Some { states = []; accepts = [] }
   else None
 

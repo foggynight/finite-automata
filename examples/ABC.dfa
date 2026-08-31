@@ -1,4 +1,5 @@
--- This is a comment.
+-- This is a DFA description file for a DFA which recognizes the language which
+-- only contains the string "ABC".
 
 -- Alphabet
 3
@@ -12,3 +13,16 @@ C
 2
 3
 4
+
+-- Initial State
+1
+
+-- Accepting States
+1
+4
+
+-- Transitions
+3
+1 A 2
+2 B 3
+3 C 4
