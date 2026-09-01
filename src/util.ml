@@ -24,13 +24,14 @@ let string_split_whitespace (str : string) : string list =
   let split = String.split_on_char ' ' str in
   List.filter (fun x -> String.length x > 0) split
 
-let print_list_string (lst : string list) : unit =
+let show_list_string (lst : string list) : string =
   let rec go lst =
     match lst with
-    | [] -> print_char ']'
+    | [] -> "]"
     | head :: tail ->
-       Printf.printf "; \"%s\"\n" head;
-       go tail
-  in print_string "[\n"; go lst
+       (Printf.sprintf "; \"%s\"\n" head) ^ go tail
+  in "[\n" ^ go lst
+
+let newline () : unit = print_char '\n'
 
 end

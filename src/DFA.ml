@@ -40,14 +40,54 @@ let eval (dfa : dfa) (input : string list) : bool =
   let rec go curr_state curr_input =
     match curr_input with
     | [] ->
-       Printf.printf "State = %s; Symbol = \n" curr_state;
+       Printf.printf "State = \"%s\"; Symbol = \n" curr_state;
        Array.mem curr_state dfa.accept_states
     | head :: tail ->
-       Printf.printf "State = %s; Symbol = %s\n" curr_state head;
+       Printf.printf "State = \"%s\"; Symbol = \"%s\"\n" curr_state head;
        match step dfa curr_state head with
        | None -> false
        | Some next_state -> go next_state tail
   in go dfa.init_state input
+
+let show_trans ({ curr_state : string;
+                  albet_sym : string;
+                  next_state : string;
+                } : dfa_trans) : string =
+  List.fold_left
+    (fun acc x -> acc ^ " " ^ x)
+    curr_state
+    [albet_sym; next_state]
+
+let show ({ albet : string array;
+            states : string array;
+            init_state : string;
+            accept_states : string array;
+            transs : dfa_trans array;
+          } : dfa) : string =
+  let str_albet =
+    (Printf.sprintf "Alphabet (%d):\n" (Array.length albet))
+    ^ (Util.show_list_string (Array.to_list albet))
+    ^ "\n" in
+
+  let str_states =
+    (Printf.sprintf "States (%d):\n" (Array.length states))
+    ^ (Util.show_list_string (Array.to_list states))
+    ^ "\n" in
+
+  let str_init_state = Printf.sprintf "Initial State: \"%s\"\n" init_state in
+
+  let str_accept_states =
+    (Printf.sprintf "Accepting States (%d):\n" (Array.length accept_states))
+    ^ (Util.show_list_string (Array.to_list accept_states))
+    ^ "\n" in
+
+  let trans_strs = Array.map show_trans transs in
+  let str_trans_strs =
+    (Printf.sprintf "Transitions (%d):\n" (Array.length transs))
+    ^ (Util.show_list_string (Array.to_list trans_strs))
+    ^ "\n" in
+
+  str_albet ^ str_states ^ str_init_state ^ str_accept_states ^ str_trans_strs
 
 (* DFA Description File Parser ************************************************)
 
@@ -86,43 +126,21 @@ let parse_lines lines : dfa option =
       (fun x -> not (Util.string_space_only x || line_is_comment x))
       lines
   in
-
-  (* let* (albet_size, dfa_albet_strs, lines) = extract_counted_lines lines in *)
   let* (albet, lines) = parse_counted_lines_array lines in
-  Printf.printf "Alphabet (%d):\n" (Array.length albet);
-  Util.print_list_string (Array.to_list albet);
-  print_char '\n';
-
   let* (states, lines) = parse_counted_lines_array lines in
-  Printf.printf "States (%d):\n" (Array.length states);
-  Util.print_list_string (Array.to_list states);
-  print_char '\n';
-
   let* (init_state, lines) = extract_single_line lines in
-  Printf.printf "Initial State: \"%s\"" init_state;
-
   let* (accept_states, lines) = parse_counted_lines_array lines in
-  Printf.printf "Accepting States (%d):\n" (Array.length accept_states);
-  Util.print_list_string (Array.to_list accept_states);
-  print_char '\n';
-
-  let* (transs, lines) = parse_counted_lines_array lines in
-  let dfa_transs =
-    List.filter_map parse_trans (Array.to_list transs)
+  let* (trans_strs, lines) = parse_counted_lines_array lines in
+  let transs =
+    List.filter_map parse_trans (Array.to_list trans_strs)
     |> Array.of_list
   in
-  if Array.length dfa_transs <> Array.length transs
-  then (Printf.printf "Failed to parse transition: (TODO)\n";
-        None)
-  else (Printf.printf "Transitions (%d):\n" (Array.length transs);
-        Util.print_list_string (Array.to_list transs);
-        print_char '\n';
+  if Array.length transs <> Array.length trans_strs then
+    begin
+      Printf.printf "Failed to parse transition: (TODO)\n";
+      None
+    end
+  else if lines <> [] then None
+  else Some { albet; states; init_state; accept_states; transs; }
 
-        if lines <> []
-        then None
-        else Some {
-                 albet; states; init_state; accept_states; transs = dfa_transs;
-               }
-        )
-
-end
+end (* module DFA *)

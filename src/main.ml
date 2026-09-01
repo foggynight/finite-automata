@@ -1,14 +1,20 @@
 open DFA
 open Util
 
+let eval dfa input_str =
+  Util.newline ();
+  print_string ("Evaluate: \"" ^ input_str ^ "\"\n");
+  let result = DFA.eval dfa (Util.explode_to_strings input_str) in
+  Printf.printf "Result: %b\n" result
+
 let main () =
-  let (dfa_input : string) = "ABC" in
   let (lines : string list) = In_channel.input_lines stdin in
-  let (parsed : DFA.dfa option) = DFA.parse_lines lines in
-  match parsed with
+  let (dfa_opt : DFA.dfa option) = DFA.parse_lines lines in
+  match dfa_opt with
     | None -> Printf.printf "Error: Failed to parse DFA\n"
     | Some dfa ->
-       let result = DFA.eval dfa (Util.explode_to_strings dfa_input) in
-       Printf.printf "Result: %b\n" result
+       print_string (DFA.show dfa);
+       eval dfa "ABC";
+       eval dfa "123"
 
 let () = main ()
