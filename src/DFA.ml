@@ -21,8 +21,6 @@ type dfa = {
     transs : dfa_trans array;
   }
 
-(* TODO: Use alphabet and state indices during computation. This function
- * currently just checks if given state is within list of DFA states. *)
 let find_state dfa state : string option =
   if Array.mem state dfa.states then Some state else None
 

@@ -8,13 +8,17 @@ let eval dfa input_str =
   Printf.printf "Result: %b\n" result
 
 let main () =
+  let argc = Array.length Sys.argv in
+
   let (lines : string list) = In_channel.input_lines stdin in
   let (dfa_opt : DFA.dfa option) = DFA.parse_lines lines in
+
   match dfa_opt with
     | None -> Printf.printf "Error: Failed to parse DFA\n"
     | Some dfa ->
        print_string (DFA.show dfa);
-       eval dfa "ABC";
-       eval dfa "123"
+       for i = 1 to (argc - 1) do
+         eval dfa Sys.argv.(i)
+       done
 
 let () = main ()
