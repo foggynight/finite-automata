@@ -8,7 +8,7 @@ let main () =
   match parsed with
     | None -> Printf.printf "Error: Failed to parse DFA\n"
     | Some dfa ->
-       let result = DFA.eval dfa 1 (Util.explode dfa_input) in
+       let result = DFA.eval dfa (Util.explode_to_strings dfa_input) in
        Printf.printf "Result: %b\n" result
 
 let () = main ()
