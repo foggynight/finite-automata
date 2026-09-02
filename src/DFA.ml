@@ -1,5 +1,5 @@
-(* DFA.ml - Deterministic Finite Automata in OCaml. *)
 (* Copyright (C) 2026 Robert Coffey *)
+(* Released under the MIT license. *)
 
 module DFA = struct
 

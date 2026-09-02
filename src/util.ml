@@ -1,3 +1,6 @@
+(* Copyright (C) 2026 Robert Coffey *)
+(* Released under the MIT license. *)
+
 module Util = struct
 
 let uncons = function

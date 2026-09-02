@@ -1,5 +1,6 @@
 *
 !Makefile
+!LICENSE
 !README.md
 !examples/
 !examples/*.dfa
