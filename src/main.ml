@@ -13,15 +13,15 @@ let main () =
   let argc = Array.length Sys.argv in
 
   let (lines : string list) = In_channel.input_lines stdin in
-  let (dfa_opt : DFA.dfa option) = DFA.parse_lines lines in
+  let (dfa_res : (DFA.dfa, string) result) = DFA.parse_lines lines in
 
-  match dfa_opt with
-    | None -> Printf.printf "Error: Failed to parse DFA\n"
-    | Some dfa ->
-       print_string (DFA.show dfa);
-       for i = 1 to (argc - 1) do
-         eval dfa Sys.argv.(i)
-       done
+  match dfa_res with
+  | Error msg -> Printf.printf "Error: failed to parse DFA: %s\n" msg
+  | Ok dfa ->
+     print_string (DFA.show dfa);
+     for i = 1 to (argc - 1) do
+       eval dfa Sys.argv.(i)
+     done
 
 let () = main ()
 
