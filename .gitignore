@@ -1,3 +1,9 @@
-finite-automata
-src/*
+*
+!Makefile
+!README.md
+!examples/
+!examples/*.dfa
+!src/
 !src/*.ml
+!test/
+!test/*.ml
