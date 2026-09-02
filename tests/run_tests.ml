@@ -5,9 +5,16 @@ open DFA
 type test_case = string * string * bool
 
 let test_cases : test_case array =
-  [| ("../examples/ABC.dfa", "ABC", true)
-   ; ("../examples/ABC.dfa", "123", false)
-   ; ("../examples/ABC.dfa", "A2C", false)
+  [| ("test_ABC.dfa", "ABC", true)
+   ; ("test_ABC.dfa", "123", false)
+   ; ("test_ABC.dfa", "A2C", false)
+
+   ; ("test_ABC.dfa", "", false)
+   ; ("test_ABC.dfa", "A", false)
+   ; ("test_ABC.dfa", "B", false)
+   ; ("test_ABC.dfa", "AB", false)
+   ; ("test_ABC.dfa", "BA", false)
+   ; ("test_ABC.dfa", "ABCD", false)
   |]
 
 let test_eval dfa input_str expect_result : bool =
@@ -15,9 +22,10 @@ let test_eval dfa input_str expect_result : bool =
   result = expect_result
 
 let main () =
+  print_string "Running Tests:\n";
   for i = 0 to (Array.length test_cases) - 1 do
-    Printf.printf "Test %d: " i;
     let (filename, input_str, expect_result) = test_cases.(i) in
+    Printf.printf "[%d] %s \"%s\" %b: " i filename input_str expect_result;
     let lines = In_channel.with_open_text filename In_channel.input_lines in
     let (dfa_opt : DFA.dfa option) = DFA.parse_lines lines in
     match dfa_opt with
