@@ -1,55 +1,19 @@
 # finite-automata
 
+Finite automata simulator.
+
 
 ## Build
 
 Written in OCaml, executable built using the native compiler (no dune).
 
-Running `make` will create the `finite-automata` native executable.
+Run `make` to create the `finite-automata` native executable.
 
 
 ## DFA Description
 
-A DFA is defined using a DFA description file, which is a text file in the
-following format:
-
-- Empty lines, and lines composed of only whitespace, are ignored.
-//- Comments are lines beginning with the string 'c'. Comment lines are ignored.
-//
-//The following sections must be in order.
-//
-//- Section 1: Alphabet: A line containing `n`, the number of symbols in the
-//  alphabet. DFAs refer to alphabet symbols by 1-based index, with the "0" symbol
-//  being reserved as an invalid symbol. The mapping of index to alphabet is to be
-//  handled external to this program.
-//
-//- Section 2: States: A line containing `m`, the number of states in the DFA.
-//  DFAs refer to states by 1-based index, with the "0" state being reserved as an
-//  invalid (dead) state. The mapping of index to alphabet is to be handled
-//  external to this program.
-//
-//- Section 3: Initial State: A line containing the initial state for the DFA. The
-//  initial state is represented by the 1-based index of the state, or the dead
-//  state "0".
-//
-//- Section 4: Accepting States: A line containing a list of the 1-based indices
-//  of the accepting states, terminated by a "0" (this does make the dead state an
-//  accepting state). e.g. "2 3 5 0" implies the accepting states are [2, 3, 5].
-//
-//- Section 5: Transitions: A line containing `q`, the number of transitions in
-//  the transition function of the DFA. Followed by `q` lines, each containing
-//  three numbers separated by whitespace: st1, sym, st2. These numbers represent ...
-//
-//```
-//c This is an example DFA description file. Building a DFA for the regex: ABC
-//
-//c Alphabet: For the alphabet { A, B, C } we have 3 symbols, thus...
-//3
-//
-//c States:
-//```
-//
-//More examples of DFA description files are provided in the `examples` directory.
+DFAs are defined using the "DFA Description File Format" shown here:
++<https://student.cs.uwaterloo.ca/~cs241/dfa/DFAfileformat.html>
 
 Quoting the file format description from the webpage above:
 
@@ -80,3 +44,6 @@ Quoting the file format description from the webpage above:
 >   in Alphabet, above. It is not necessary to specify transitions on every
 >   state and letter pair; omitted transitions are assumed to go to an implicit
 >   error state.
+
+Additionally, empty lines and comments are ignored. comments are lines that
+begin with "--".
