@@ -1,5 +1,6 @@
-SRC_LIST = ../src/util.ml ../src/DFA.ml
+PROG = run_tests
+MODS = -I ../src ../src/util.ml ../src/DFA.ml
 
 .PHONY: all
 all:
-	ocamlopt -I ../src $(SRC_LIST) run_tests.ml
+	ocamlopt -o $(PROG) $(MODS) $(PROG).ml
