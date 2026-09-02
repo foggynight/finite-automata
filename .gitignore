@@ -5,5 +5,5 @@
 !examples/*.dfa
 !src/
 !src/*.ml
-!test/
-!test/*.ml
+!tests/
+!tests/*.ml

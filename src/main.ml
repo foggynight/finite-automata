@@ -1,6 +1,8 @@
 open DFA
 open Util
 
+module Main = struct
+
 let eval dfa input_str =
   Util.newline ();
   print_string ("Evaluate: \"" ^ input_str ^ "\"\n");
@@ -22,3 +24,5 @@ let main () =
        done
 
 let () = main ()
+
+end (* module Main *)

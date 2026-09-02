@@ -37,11 +37,8 @@ let step (dfa : dfa) (state : string) (albet_sym : string) : string option =
 let eval (dfa : dfa) (input : string list) : bool =
   let rec go curr_state curr_input =
     match curr_input with
-    | [] ->
-       Printf.printf "State = \"%s\"; Symbol = \n" curr_state;
-       Array.mem curr_state dfa.accept_states
+    | [] -> Array.mem curr_state dfa.accept_states
     | head :: tail ->
-       Printf.printf "State = \"%s\"; Symbol = \"%s\"\n" curr_state head;
        match step dfa curr_state head with
        | None -> false
        | Some next_state -> go next_state tail
