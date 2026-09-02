@@ -1,7 +1,7 @@
+module Main = struct
+
 open DFA
 open Util
-
-module Main = struct
 
 let eval dfa input_str =
   Util.newline ();

@@ -1,11 +1,11 @@
 (* DFA.ml - Deterministic Finite Automata in OCaml. *)
 (* Copyright (C) 2026 Robert Coffey *)
 
+module DFA = struct
+
 open Option.Syntax
 
 open Util
-
-module DFA = struct
 
 type dfa_trans = {
     curr_state : string;
