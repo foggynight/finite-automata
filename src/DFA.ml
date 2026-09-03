@@ -134,6 +134,9 @@ let rec parse_trans (str : string) : dfa_trans option =
      Some { curr_state; albet_sym ; next_state }
   | _ -> None
 
+let invalid_state_msg state_type state =
+  Printf.sprintf "invalid %s state: %s" state_type state
+
 (* Expects a list of strings representing the lines of a DFA description file,
  * with the terminating newline characters removed. *)
 let parse_lines lines : (dfa, string) result =
@@ -146,7 +149,17 @@ let parse_lines lines : (dfa, string) result =
   let* (albet, lines) = parse_counted_lines_array lines in
   let* (states, lines) = parse_counted_lines_array lines in
   let* (init_state, lines) = extract_single_line lines in
+  let* () =
+    if not (Array.mem init_state states)
+    then Error (invalid_state_msg "initial" init_state)
+    else Ok ()
+  in
   let* (accept_states, lines) = parse_counted_lines_array lines in
+  let* () =
+    match Array.find_opt (fun x -> not (Array.mem x states)) accept_states with
+      | Some invalid_state -> Error (invalid_state_msg "accept" invalid_state)
+      | None -> Ok ()
+  in
   let* (trans_strs, lines) = parse_counted_lines_array lines in
   let transs =
     List.filter_map parse_trans (Array.to_list trans_strs)
