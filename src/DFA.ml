@@ -1,3 +1,4 @@
+(* Deterministic Finite Automata *)
 (* Copyright (C) 2026 Robert Coffey *)
 (* Released under the MIT license. *)
 
@@ -27,6 +28,8 @@ let find_trans dfa state albet_sym : dfa_trans option =
     (fun x -> x.curr_state = state && x.albet_sym = albet_sym)
     dfa.transs
 
+(* TODO?: Verify states and input valid prior to execution, less option/result
+ * needed. *)
 let step (dfa : dfa) (state : string) (albet_sym : string)
     : (string, string) result =
   let (let*) = Result.bind in
@@ -37,7 +40,7 @@ let step (dfa : dfa) (state : string) (albet_sym : string)
   in
   let* trans =
     match find_trans dfa state albet_sym with
-    | None -> Error "failed to find transition for..."
+    | None -> Error "failed to find transition for... (TODO)"
     | Some trans -> Ok trans
   in
   Ok trans.next_state
@@ -69,30 +72,32 @@ let show ({ albet : string array;
           } : dfa) : string =
   let str_albet =
     (Printf.sprintf "Alphabet (%d):\n" (Array.length albet))
-    ^ (Util.show_list_string (Array.to_list albet))
+    ^ (Util.show_list_string_multiline (Array.to_list albet))
     ^ "\n" in
 
   let str_states =
     (Printf.sprintf "States (%d):\n" (Array.length states))
-    ^ (Util.show_list_string (Array.to_list states))
+    ^ (Util.show_list_string_multiline (Array.to_list states))
     ^ "\n" in
 
   let str_init_state = Printf.sprintf "Initial State: \"%s\"\n" init_state in
 
   let str_accept_states =
     (Printf.sprintf "Accepting States (%d):\n" (Array.length accept_states))
-    ^ (Util.show_list_string (Array.to_list accept_states))
+    ^ (Util.show_list_string_multiline (Array.to_list accept_states))
     ^ "\n" in
 
   let trans_strs = Array.map show_trans transs in
   let str_trans_strs =
     (Printf.sprintf "Transitions (%d):\n" (Array.length transs))
-    ^ (Util.show_list_string (Array.to_list trans_strs))
+    ^ (Util.show_list_string_multiline (Array.to_list trans_strs))
     ^ "\n" in
 
   str_albet ^ str_states ^ str_init_state ^ str_accept_states ^ str_trans_strs
 
 (* DFA Description File Parser ************************************************)
+
+(* TODO: Verify states in transitions are valid. *)
 
 let line_is_comment line = String.starts_with ~prefix:"--" line
 

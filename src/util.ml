@@ -27,7 +27,15 @@ let string_split_whitespace (str : string) : string list =
   let split = String.split_on_char ' ' str in
   List.filter (fun x -> String.length x > 0) split
 
-let show_list_string (lst : string list) : string =
+let show_string str = Printf.sprintf "\"%s\"" str
+
+let show_list_string = function
+  | [] -> "[]"
+  | head :: tail ->
+     let body = List.fold_left (fun acc x -> acc ^ "; " ^ x) head tail in
+     "[" ^ body ^ "]"
+
+let show_list_string_multiline (lst : string list) : string =
   let rec go lst =
     match lst with
     | [] -> "]"

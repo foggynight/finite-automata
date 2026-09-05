@@ -4,7 +4,10 @@
 !README.md
 !examples/
 !examples/*.dfa
+!examples/*.nfa
 !src/
 !src/*.ml
+!src/*.mli
 !tests/
 !tests/*.ml
+!tests/*.mli

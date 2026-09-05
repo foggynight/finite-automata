@@ -1,11 +1,13 @@
+SRCS = util.ml DFA.ml NFA.ml main.ml
+
 .PHONY: all
 all:
-	cd src && ocamlopt -o ../finite-automata util.ml DFA.ml main.ml
+	cd src && ocamlopt -o ../finite-automata $(SRCS)
 	$(MAKE) clean
 
 .PHONY: bytecode
 bytecode:
-	cd src && ocamlc -o ../finite-automata util.ml DFA.ml main.ml
+	cd src && ocamlc -o ../finite-automata $(SRCS)
 	$(MAKE) clean
 
 .PHONY: clean
