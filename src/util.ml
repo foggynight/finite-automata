@@ -32,7 +32,12 @@ let show_string str = Printf.sprintf "\"%s\"" str
 let show_list_string = function
   | [] -> "[]"
   | head :: tail ->
-     let body = List.fold_left (fun acc x -> acc ^ "; " ^ x) head tail in
+     let body =
+       List.fold_left
+         (fun acc x -> acc ^ "; " ^ show_string x)
+         (show_string head)
+         tail
+     in
      "[" ^ body ^ "]"
 
 let show_list_string_multiline (lst : string list) : string =
@@ -40,7 +45,7 @@ let show_list_string_multiline (lst : string list) : string =
     match lst with
     | [] -> "]"
     | head :: tail ->
-       (Printf.sprintf "; \"%s\"\n" head) ^ go tail
+       (Printf.sprintf "; %s\n" (show_string head)) ^ go tail
   in "[\n" ^ go lst
 
 let newline () : unit = print_char '\n'
