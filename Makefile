@@ -1,13 +1,15 @@
-SRCS = util.ml DFA.ml NFA.ml main.ml
+SRC_DIR = src
+SRC_FILES = util.ml NFA.ml DFA.ml parser.ml main.ml
+SRCS = $(addprefix $(SRC_DIR)/,$(SRC_FILES))
 
 .PHONY: all
 all:
-	cd src && ocamlopt -o ../finite-automata $(SRCS)
+	ocamlopt -o finite-automata -I $(SRC_DIR) $(SRCS)
 	$(MAKE) clean
 
 .PHONY: bytecode
 bytecode:
-	cd src && ocamlc -o ../finite-automata $(SRCS)
+	ocamlc -o finite-automata -I $(SRC_DIR) $(SRCS)
 	$(MAKE) clean
 
 .PHONY: clean

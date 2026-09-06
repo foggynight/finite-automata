@@ -3,9 +3,10 @@
 
 module Main = struct
 
-open DFA
-open NFA
 open Util
+open NFA
+open DFA
+open Parser
 
 (* type fa_type = DFA | NFA *)
 
@@ -45,8 +46,8 @@ let main () =
   in
   let fa_lines = In_channel.input_lines stdin in
   match !flag_fa_type with
-  | "DFA" -> go fa_lines DFA.parse_lines DFA.eval !input_strs
-  | "NFA" -> go fa_lines DFA.parse_lines NFA.eval !input_strs
+  | "DFA" -> go fa_lines Parser.parse_DFA DFA.eval !input_strs
+  | "NFA" -> go fa_lines Parser.parse_NFA NFA.eval !input_strs
   | str   -> error ("invalid FA type: %s" ^ Util.show_string str)
 
 let () = main ()
