@@ -73,19 +73,19 @@ let show ({ albet : string array;
   let str_albet =
     (Printf.sprintf "Alphabet (%d):\n" (Array.length albet))
     ^ (Util.show_list_string_multiline (Array.to_list albet))
-    ^ "\n" in
+    ^ "\n\n" in
 
   let str_states =
     (Printf.sprintf "States (%d):\n" (Array.length states))
     ^ (Util.show_list_string_multiline (Array.to_list states))
-    ^ "\n" in
+    ^ "\n\n" in
 
   let str_init_state = Printf.sprintf "Initial State: \"%s\"\n" init_state in
 
   let str_accept_states =
     (Printf.sprintf "Accepting States (%d):\n" (Array.length accept_states))
     ^ (Util.show_list_string_multiline (Array.to_list accept_states))
-    ^ "\n" in
+    ^ "\n\n" in
 
   let trans_strs = Array.map show_trans transs in
   let str_trans_strs =

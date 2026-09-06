@@ -31,16 +31,16 @@ let main () =
     match parse_fun fa_lines with
     | Error msg -> error ("failed to parse automaton: " ^ msg)
     | Ok fa ->
-       if !flag_verbose then print_string (DFA.show fa);
+       if !flag_verbose then
+         begin
+           print_string (DFA.show fa);
+           if input_strs <> [] then print_char '\n';
+         end;
        List.iter
          (fun input_str ->
            let result = eval_fun fa (Util.explode_to_strings input_str) in
            if !flag_verbose then
-             begin
-               Util.newline ();
-               print_string ("Evaluate: \"" ^ input_str ^ "\"\n");
-               Printf.printf "Result: %b\n" result
-             end)
+             Printf.printf "%s => %b\n" (Util.show_string input_str) result;)
          input_strs
   in
   let fa_lines = In_channel.input_lines stdin in
