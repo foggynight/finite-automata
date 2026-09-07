@@ -1,28 +1,25 @@
 -- Alphabet
-4
+3
 A
 B
 C
-D
 
 -- States
-5
+4
 1
 2
 3
 4
-5
 
 -- Initial State
 1
 
 -- Accepting States
 1
-5
+4
 
 -- Transitions
-4
-X A 2
-2 Y 3
-3 C 4
-4 D Z
+3
+1 A
+2 B 3
+C 4

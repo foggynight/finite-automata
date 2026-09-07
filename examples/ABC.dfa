@@ -1,5 +1,4 @@
--- This is a DFA description file for a DFA which recognizes the language which
--- only contains the string "ABC".
+-- DFA which recognizes the language which only contains the string "ABC".
 
 -- Alphabet
 3

@@ -1,4 +1,5 @@
--- Language over the alphabet {A, B} where the second-last character is B.
+-- NFA which recognizes the language over the alphabet {A, B} where the
+-- second-last character is B.
 
 -- Alphabet
 2

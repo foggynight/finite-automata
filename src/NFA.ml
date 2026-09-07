@@ -77,10 +77,9 @@ let show_trans ({ curr_state : string;
                   albet_sym : string;
                   next_state : string;
                 } : trans) : string =
-  List.fold_left
-    (fun acc x -> acc ^ " " ^ x)
-    curr_state
-    [albet_sym; next_state]
+  (* let f = Util.show_string in *)
+  let f = Fun.id in
+  Printf.sprintf "\"%s %s %s\"" (f curr_state) (f albet_sym) (f next_state)
 
 let show ({ albet : string array;
             states : string array;
@@ -108,7 +107,8 @@ let show ({ albet : string array;
   let trans_strs = Array.map show_trans transs in
   let str_trans_strs =
     (Printf.sprintf "Transitions (%d):\n" (Array.length transs))
-    ^ (Util.show_list_string_multiline (Array.to_list trans_strs))
+    ^ (Util.show_list_string_multiline
+         ~fmt_fun:Fun.id (Array.to_list trans_strs))
     ^ "\n" in
 
   str_albet ^ str_states ^ str_init_state ^ str_accept_states ^ str_trans_strs

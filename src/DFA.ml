@@ -18,19 +18,17 @@ let find_trans (dfa : t) state albet_sym : trans option =
     (fun (x : trans) -> x.curr_state = state && x.albet_sym = albet_sym)
     dfa.transs
 
-(* TODO?: Verify states and input valid prior to execution, less option/result
- * needed. *)
 let step (dfa : t) (state : string) (albet_sym : string)
     : (string, string) result =
   let (let*) = Result.bind in
   let* state =
     match find_state dfa state with
-    | None -> Error "failed to find current state"
+    | None -> Error "failed to find current state (unreachable)"
     | Some state -> Ok state
   in
   let* trans =
     match find_trans dfa state albet_sym with
-    | None -> Error "failed to find transition for... (TODO)"
+    | None -> Error "failed to find transition (unreachable)"
     | Some trans -> Ok trans
   in
   Ok trans.next_state

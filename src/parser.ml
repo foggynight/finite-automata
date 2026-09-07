@@ -3,9 +3,12 @@
 (* Released under the MIT license. *)
 
 (* NOTE: `lines` refers to a list of strings, each representing a single line of
- * text, with the newline character(s) removed. *)
+ * text, with the terminating newline character removed. *)
 
-(* TODO: Verify states in transitions are valid. *)
+(* TODO: Move this into NFA module, and add parse_DFA to DFA module. *)
+
+(* TODO: Better error messages, show line number, improve root message, less
+ * nesting. *)
 
 module Parser = struct
 
@@ -47,45 +50,34 @@ let parse_counted_lines_array (lines : string list)
   let* (count, targ_lines, rest_lines) = extract_counted_lines lines in
   Ok (Array.of_list targ_lines, rest_lines)
 
-let rec parse_trans (str : string) : DFA.trans option =
+let rec parse_trans (str : string) : NFA.trans option =
   match Util.string_split_whitespace str with
   | [curr_state; albet_sym; next_state] ->
      Some { curr_state; albet_sym ; next_state }
   | _ -> None
 
 let invalid_state_msg state_type state =
-  Printf.sprintf "invalid %s state: %s" state_type state
+  Printf.sprintf "invalid %s%sstate: %s"
+    state_type (if state_type = "" then "" else " ") state
 
-let parse_DFA (lines : string list) : (DFA.t, string) result =
-  let (let*) = Result.bind in
-  let lines =
-    List.filter
-      (fun x -> not (Util.string_space_only x || line_is_comment x))
-      lines
-  in
-  let* (albet, lines) = parse_counted_lines_array lines in
-  let* (states, lines) = parse_counted_lines_array lines in
-  let* (init_state, lines) = extract_single_line lines in
-  let* () =
-    if not (Array.mem init_state states)
-    then Error (invalid_state_msg "initial" init_state)
-    else Ok ()
-  in
-  let* (accept_states, lines) = parse_counted_lines_array lines in
-  let* () =
-    match Array.find_opt (fun x -> not (Array.mem x states)) accept_states with
-    | Some invalid_state -> Error (invalid_state_msg "accept" invalid_state)
-    | None -> Ok ()
-  in
-  let* (trans_strs, lines) = parse_counted_lines_array lines in
-  let transs =
-    List.filter_map parse_trans (Array.to_list trans_strs)
-    |> Array.of_list
-  in
-  if Array.length transs <> Array.length trans_strs then
-    Error "failed to parse transition (TODO: output invalid transitions)"
-  else if lines <> [] then Error "input remaining"
-  else Ok ({ albet; states; init_state; accept_states; transs; } : DFA.t)
+let find_invalid_transs (transs : NFA.trans array) albet states
+    : (int * NFA.trans * string) list =
+  let rec go = function
+    | [] -> []
+    | ((i, trans) : (int * NFA.trans)) :: tl ->
+       let reason =
+         if not (Array.mem trans.albet_sym albet) then
+           ("symbol not in alphabet " ^ Util.show_string trans.albet_sym)
+         else if not (Array.mem trans.curr_state states) then
+           ("invalid current state " ^ Util.show_string trans.curr_state)
+         else if not (Array.mem trans.next_state states) then
+           ("invalid next state " ^ Util.show_string trans.next_state)
+         else ""
+       in
+       if reason = ""
+       then go tl
+       else (i, trans, reason) :: go tl
+  in go (List.mapi (fun i x -> (i, x)) (Array.to_list transs))
 
 let parse_NFA (lines : string list) : (NFA.t, string) result =
   let (let*) = Result.bind in
@@ -94,28 +86,80 @@ let parse_NFA (lines : string list) : (NFA.t, string) result =
       (fun x -> not (Util.string_space_only x || line_is_comment x))
       lines
   in
+
   let* (albet, lines) = parse_counted_lines_array lines in
   let* (states, lines) = parse_counted_lines_array lines in
+
   let* (init_state, lines) = extract_single_line lines in
   let* () =
     if not (Array.mem init_state states)
     then Error (invalid_state_msg "initial" init_state)
     else Ok ()
   in
+
   let* (accept_states, lines) = parse_counted_lines_array lines in
   let* () =
     match Array.find_opt (fun x -> not (Array.mem x states)) accept_states with
     | Some invalid_state -> Error (invalid_state_msg "accept" invalid_state)
     | None -> Ok ()
   in
+
   let* (trans_strs, lines) = parse_counted_lines_array lines in
-  let transs =
-    List.filter_map parse_trans (Array.to_list trans_strs)
-    |> Array.of_list
+  let* transs =
+    match Array.map parse_trans trans_strs
+          |> Util.array_all_some_res
+    with
+    | Ok transs -> Ok transs
+    | Error indices ->
+       let err_strs =
+         List.map
+           (fun i -> Printf.sprintf "[%d]: %s"
+                       i (Util.show_string trans_strs.(i)))
+           indices
+       in
+       Error ("failed to parse transition(s):\n"
+              ^ Util.show_list_string_multiline ~fmt_fun:Fun.id err_strs)
   in
-  if Array.length transs <> Array.length trans_strs then
-    Error "failed to parse transition (TODO: output invalid transitions)"
-  else if lines <> [] then Error "input remaining"
+  let* () =
+    match find_invalid_transs transs albet states with
+    | [] -> Ok ()
+    | invalid_transs ->
+       let rec go = function
+         | [] -> []
+         | (i, trans, reason) :: tl ->
+            Printf.sprintf "[%d] %s (%s)" i (NFA.show_trans trans) reason
+            :: go tl
+       in
+       let body_str =
+         go invalid_transs
+         |> Util.show_list_string_multiline ~fmt_fun:Fun.id
+       in
+       Error ("invalid transition(s):\n" ^ body_str)
+  in
+
+  if lines <> [] then Error "parse complete but input remaining"
   else Ok ({ albet; states; init_state; accept_states; transs; } : NFA.t)
+
+let parse_DFA (lines : string list) : (DFA.t, string) result =
+  let (let*) = Result.bind in
+  let* (nfa : NFA.t) = parse_NFA lines in
+  let* () =
+    let dups = ref [] in
+    for i = 0 to (Array.length nfa.transs) - 1 do
+      let trans = nfa.transs.(i) in
+      if ((Util.array_find_offset trans (i+1) nfa.transs)
+          && not (List.mem trans !dups))
+      then dups := trans :: !dups;
+    done;
+    dups := List.rev !dups;
+    match !dups with
+    | [] -> Ok ()
+    | ds ->
+       let body_str =
+         Util.show_list_string_multiline
+           ~fmt_fun:Fun.id (List.map NFA.show_trans !dups)
+       in Error ("duplicate transitions:\n" ^ body_str)
+  in
+  Ok nfa
 
 end (* module Parser *)
