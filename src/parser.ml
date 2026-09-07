@@ -140,26 +140,23 @@ let parse_NFA (lines : string list) : (NFA.t, string) result =
   if lines <> [] then Error "parse complete but input remaining"
   else Ok ({ albet; states; init_state; accept_states; transs; } : NFA.t)
 
+let find_duplicate_transs (transs : NFA.trans array) : NFA.trans list =
+  let dups = ref [] in
+  for i = 0 to (Array.length transs) - 1 do
+    let trans = transs.(i) in
+    if ((Util.array_find_offset trans (i+1) transs)
+        && not (List.mem trans !dups))
+    then dups := trans :: !dups;
+  done;
+  List.rev !dups
+
 let parse_DFA (lines : string list) : (DFA.t, string) result =
   let (let*) = Result.bind in
   let* (nfa : NFA.t) = parse_NFA lines in
-  let* () =
-    let dups = ref [] in
-    for i = 0 to (Array.length nfa.transs) - 1 do
-      let trans = nfa.transs.(i) in
-      if ((Util.array_find_offset trans (i+1) nfa.transs)
-          && not (List.mem trans !dups))
-      then dups := trans :: !dups;
-    done;
-    dups := List.rev !dups;
-    match !dups with
-    | [] -> Ok ()
-    | ds ->
-       let body_str =
-         Util.show_list_string_multiline
-           ~fmt_fun:Fun.id (List.map NFA.show_trans !dups)
-       in Error ("duplicate transitions:\n" ^ body_str)
-  in
-  Ok nfa
+  match find_duplicate_transs nfa.transs with
+  | [] -> Ok nfa
+  | ds -> let body_str = Util.show_list_string_multiline
+                           ~fmt_fun:Fun.id (List.map NFA.show_trans ds)
+          in Error ("duplicate transitions:\n" ^ body_str)
 
 end (* module Parser *)
