@@ -52,8 +52,8 @@ let parse_counted_lines_array (lines : string list)
 
 let rec parse_trans (str : string) : NFA.trans option =
   match Util.string_split_whitespace str with
-  | [curr_state; albet_sym; next_state] ->
-     Some { curr_state; albet_sym ; next_state }
+  | [curr_state; symbol; next_state] ->
+     Some { curr_state; symbol ; next_state }
   | _ -> None
 
 let invalid_state_msg state_type state =
@@ -66,8 +66,8 @@ let find_invalid_transs (transs : NFA.trans array) albet states
     | [] -> []
     | ((i, trans) : (int * NFA.trans)) :: tl ->
        let reason =
-         if not (Array.mem trans.albet_sym albet) then
-           ("symbol not in alphabet " ^ Util.show_string trans.albet_sym)
+         if not (Array.mem trans.symbol albet) then
+           ("symbol not in alphabet " ^ Util.show_string trans.symbol)
          else if not (Array.mem trans.curr_state states) then
            ("invalid current state " ^ Util.show_string trans.curr_state)
          else if not (Array.mem trans.next_state states) then

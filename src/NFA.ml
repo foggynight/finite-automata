@@ -2,28 +2,33 @@
 (* Copyright (C) 2026 Robert Coffey *)
 (* Released under the MIT license. *)
 
+(* TODO: Add epsilon transitions. *)
+
 module NFA = struct
 
 open Util
 
+type symbol = string
+type state = string
+
 type trans = {
-    curr_state : string;
-    albet_sym : string;
-    next_state : string;
+    curr_state : state;
+    symbol : symbol;
+    next_state : state;
   }
 
 type t = {
-    albet : string array;
-    states : string array;
-    init_state : string;
-    accept_states : string array;
+    albet : symbol array;
+    states : state array;
+    init_state : state;
+    accept_states : state array;
     transs : trans array;
   }
 
 type world = {
-    curr_state : string;
-    curr_input : string list;
-}
+    curr_state : state;
+    curr_input : symbol list;
+  }
 
 let world_complete (nfa : t) (world : world) : bool =
   world.curr_input = []
@@ -35,10 +40,10 @@ let world_complete (nfa : t) (world : world) : bool =
 let all_worlds_complete (nfa : t) (worlds : world Queue.t) : bool =
   Queue.fold (fun acc w -> acc && world_complete nfa w) true worlds
 
-let find_transs (nfa : t) state albet_sym : trans list =
+let find_transs (nfa : t) state sym : trans list =
   Array.fold_left
     (fun acc (x : trans) ->
-      if x.curr_state = state && x.albet_sym = albet_sym
+      if x.curr_state = state && x.symbol = sym
       then x :: acc
       else acc)
     [] nfa.transs
@@ -55,6 +60,7 @@ let step_world (nfa : t) (world : world) : world list =
 
 let eval (nfa : t) (input : string list) : bool =
   let (worlds : world Queue.t) = Queue.create () in
+  (* let (completed : world list) = ref [] in *)
   Queue.push { curr_state = nfa.init_state; curr_input = input } worlds;
   while not (all_worlds_complete nfa worlds) do
     while world_complete nfa (Queue.top worlds) do
@@ -73,13 +79,10 @@ let show_world ({ curr_state; curr_input } : world) : string =
   let list_str = Util.show_list_string curr_input in
   Printf.sprintf "{ curr_state = \"%s\"; curr_input = %s }" curr_state list_str
 
-let show_trans ({ curr_state : string;
-                  albet_sym : string;
-                  next_state : string;
-                } : trans) : string =
+let show_trans ({ curr_state; symbol; next_state } : trans) : string =
   (* let f = Util.show_string in *)
   let f = Fun.id in
-  Printf.sprintf "\"%s %s %s\"" (f curr_state) (f albet_sym) (f next_state)
+  Printf.sprintf "\"%s %s %s\"" (f curr_state) (f symbol) (f next_state)
 
 let show ({ albet : string array;
             states : string array;
