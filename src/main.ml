@@ -6,13 +6,10 @@ module Main = struct
 open Util
 open NFA
 open DFA
-open Parser
 
-(* type fa_type = DFA | NFA *)
-
-let error msg = (* ?(code = 1) = *)
+let fail ?(code = 1) msg =
   Printf.eprintf "Error: %s\n" msg;
-  exit 1 (* code *)
+  exit code
 
 let main () =
   let flag_verbose = ref false
@@ -30,7 +27,7 @@ let main () =
 
   let go fa_lines parse_fun eval_fun input_strs =
     match parse_fun fa_lines with
-    | Error msg -> error ("parse failed: " ^ msg)
+    | Error msg -> fail ~code:2 ("parse failed: " ^ msg)
     | Ok fa ->
        if !flag_verbose then
          begin
@@ -44,11 +41,12 @@ let main () =
              Printf.printf "%s => %b\n" (Util.show_string input_str) result;)
          input_strs
   in
+
   let fa_lines = In_channel.input_lines stdin in
   match !flag_fa_type with
-  | "DFA" -> go fa_lines Parser.parse_DFA DFA.eval !input_strs
-  | "NFA" -> go fa_lines Parser.parse_NFA NFA.eval !input_strs
-  | str   -> error ("invalid FA type: %s" ^ Util.show_string str)
+  | "DFA" -> go fa_lines DFA.parse DFA.eval !input_strs
+  | "NFA" -> go fa_lines NFA.parse NFA.eval !input_strs
+  | str   -> fail ~code:1 ("invalid FA type: %s" ^ Util.show_string str)
 
 let () = main ()
 
