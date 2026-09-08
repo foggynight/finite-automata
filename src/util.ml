@@ -10,12 +10,17 @@ let uncons = function
   | [] -> None
   | head :: tail -> Some (head, tail)
 
-let array_find_offset (target : 'a) (offset : int) (arr : 'a array) : bool =
+let array_find_offset_p
+      (p : 'a -> 'a -> bool)
+      (target : 'a)
+      (offset : int)
+      (arr : 'a array)
+    : bool =
   let rec loop i =
     if i >= Array.length arr then
       false
     else
-      if arr.(i) = target then
+      if p arr.(i) target then
         true
       else
         loop (i+1)

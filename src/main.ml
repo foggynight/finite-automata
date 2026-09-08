@@ -30,7 +30,7 @@ let main () =
 
   let go fa_lines parse_fun eval_fun input_strs =
     match parse_fun fa_lines with
-    | Error msg -> error ("failed to parse automaton: " ^ msg)
+    | Error msg -> error ("parse failed: " ^ msg)
     | Ok fa ->
        if !flag_verbose then
          begin

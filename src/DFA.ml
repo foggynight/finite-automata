@@ -25,12 +25,12 @@ let step (dfa : t) (st : string) (symbol : string)
   let (let*) = Result.bind in
   let* st =
     match find_state dfa st with
-    | None -> Error "failed to find current state (unreachable)"
+    | None -> Error "DFA.step: failed to find current state"
     | Some st -> Ok st
   in
   let* trans =
     match find_trans dfa st symbol with
-    | None -> Error "failed to find transition (unreachable)"
+    | None -> Error "DFA.step: failed to find transition"
     | Some trans -> Ok trans
   in
   Ok trans.next_state
